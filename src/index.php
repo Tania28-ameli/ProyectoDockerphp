@@ -1,20 +1,16 @@
 <?php
 require 'conexion.php';
-
 $mensaje = '';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre  = htmlspecialchars(trim($_POST['nombre']));
     $email   = htmlspecialchars(trim($_POST['email']));
     $msg     = htmlspecialchars(trim($_POST['mensaje']));
-
     if ($nombre && $email) {
         $stmt = $pdo->prepare("INSERT INTO registros (nombre, email, mensaje) VALUES (?, ?, ?)");
         $stmt->execute([$nombre, $email, $msg]);
         $mensaje = "<p class='exito'>✅ Registro guardado correctamente.</p>";
     }
 }
-
 $registros = $pdo->query("SELECT * FROM registros ORDER BY created_at DESC")->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -31,6 +27,9 @@ $registros = $pdo->query("SELECT * FROM registros ORDER BY created_at DESC")->fe
         th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
         th { background: #f0f0f0; }
         .exito { color: green; }
+        /* ← NUEVO: estilo para el botón editar */
+        .btn-editar { color: #3B8BD4; text-decoration: none; font-weight: bold; }
+        .btn-editar:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -45,10 +44,10 @@ $registros = $pdo->query("SELECT * FROM registros ORDER BY created_at DESC")->fe
         <textarea name="mensaje" rows="4"></textarea>
         <button type="submit">Guardar Registro</button>
     </form>
-
     <h2>Registros Guardados</h2>
     <table>
-        <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Mensaje</th><th>Fecha</th></tr>
+        <!-- ← NUEVO: se agregó columna Acciones -->
+        <tr><th>ID</th><th>Nombre</th><th>Email</th><th>Mensaje</th><th>Fecha</th><th>Acciones</th></tr>
         <?php foreach ($registros as $r): ?>
         <tr>
             <td><?= $r['id'] ?></td>
@@ -56,6 +55,8 @@ $registros = $pdo->query("SELECT * FROM registros ORDER BY created_at DESC")->fe
             <td><?= $r['email'] ?></td>
             <td><?= $r['mensaje'] ?></td>
             <td><?= $r['created_at'] ?></td>
+            <!-- ← NUEVO: enlace a editar.php con el id del registro -->
+            <td><a class="btn-editar" href="editar.php?id=<?= $r['id'] ?>">✏️ Editar</a></td>
         </tr>
         <?php endforeach; ?>
     </table>
